@@ -1,6 +1,9 @@
 package ring
 
+const defaultRingSize = 10
+
 type Ring[T comparable] struct {
+	size int
 	head *Record[T]
 }
 
@@ -9,8 +12,29 @@ type Record[T comparable] struct {
 	next  *Record[T]
 }
 
-func NewRing[T comparable]() Ring[T] {
-	return Ring[T]{head: nil}
+func NewRing[T comparable](opts ...Option[T]) Ring[T] {
+	r := Ring[T]{head: nil}
+
+	for _, opt := range opts {
+		opt(r)
+	}
+
+	if r.size == 0 {
+		r.size = defaultRingSize
+	}
+
+	return r
+}
+
+type Option[T comparable] func(stack Ring[T])
+
+func WithSize[T comparable](size int) Option[T] {
+	return func(r Ring[T]) {
+		if size != 0 {
+			size = defaultRingSize
+		}
+		r.size = size
+	}
 }
 
 func (r *Ring[T]) Add(v T) {
@@ -28,6 +52,10 @@ func (r *Ring[T]) Add(v T) {
 		current.next = newRecord
 		newRecord.next = r.head
 	}
+}
+
+func (r *Ring[T]) GetHead() *Record[T] {
+	return r.head
 }
 
 func (r *Ring[T]) Get() []T {

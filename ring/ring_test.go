@@ -21,4 +21,11 @@ func TestRing(t *testing.T) {
 	res = r.Get()
 	assert.Len(t, res, 3)
 	assert.Equal(t, []int{1, 2, 90}, res)
+
+	head := r.GetHead()
+	assert.Equal(t, 1, head.value)
+	assert.Equal(t, 2, head.next.value)
+	assert.Equal(t, 90, head.next.next.value)
+	assert.Equal(t, 1, head.next.next.next.value)
+
 }

@@ -7,7 +7,7 @@ import (
 )
 
 func TestStack(t *testing.T) {
-	s := NewStack[int](5)
+	s := NewStack[int](WithCap[int](5))
 	assert.Len(t, s.values, 0)
 
 	s.Push(1, 2, 3)

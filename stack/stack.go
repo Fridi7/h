@@ -5,17 +5,32 @@ import "sync"
 const defaultStackCap = 100
 
 type Stack[T comparable] struct {
+	cap    int
 	values []T
-	mu     sync.Mutex
+	mu     *sync.Mutex
 }
 
-func NewStack[T comparable](c int) Stack[T] {
-	if c == 0 {
-		c = defaultStackCap
+func NewStack[T comparable](opts ...Option[T]) Stack[T] {
+	s := Stack[T]{
+		mu:  &sync.Mutex{},
+		cap: defaultStackCap,
 	}
 
-	return Stack[T]{
-		values: make([]T, 0, c),
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	s.values = make([]T, 0, s.cap)
+	return s
+}
+
+type Option[T comparable] func(stack Stack[T])
+
+func WithCap[T comparable](cap int) Option[T] {
+	return func(s Stack[T]) {
+		if cap > 0 {
+			s.cap = cap
+		}
 	}
 }
 

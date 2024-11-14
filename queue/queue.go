@@ -5,17 +5,32 @@ import "sync"
 const defaultQueueCap = 100
 
 type Queue[T comparable] struct {
+	cap    int
 	values []T
-	mu     sync.Mutex
+	mu     *sync.Mutex
 }
 
-func NewQueue[T comparable](c int) Queue[T] {
-	if c == 0 {
-		c = defaultQueueCap
+func NewQueue[T comparable](opts ...Option[T]) Queue[T] {
+	q := Queue[T]{
+		mu:  &sync.Mutex{},
+		cap: defaultQueueCap,
 	}
 
-	return Queue[T]{
-		values: make([]T, 0, c),
+	for _, opt := range opts {
+		opt(q)
+	}
+
+	q.values = make([]T, 0, q.cap)
+	return q
+}
+
+type Option[T comparable] func(stack Queue[T])
+
+func WithCap[T comparable](cap int) Option[T] {
+	return func(q Queue[T]) {
+		if cap > 0 {
+			q.cap = cap
+		}
 	}
 }
 
